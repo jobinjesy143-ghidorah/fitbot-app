@@ -1,0 +1,1 @@
+const String apiBase = "https://ghidorah143-fitbot-backend.hf.space/get_outfit";
