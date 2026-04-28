@@ -2,6 +2,7 @@ name: "iOS Free Build"
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: # This gives you the manual "Run" button
 
 jobs:
   build:
@@ -15,27 +16,17 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Smart Project Discovery & Install
+      - name: Install Dependencies
         run: |
-          # This command finds exactly where your pubspec.yaml is located
-          PROJECT_PATH=$(find . -name pubspec.yaml -exec dirname {} \;)
-          echo "Project located at: $PROJECT_PATH"
-          
-          # Move into that folder and install everything
-          cd "$PROJECT_PATH"
           flutter pub get
           flutter precache --ios 
 
       - name: Build iOS (No Signature)
         run: |
-          # Find the project again to be safe
-          PROJECT_PATH=$(find . -name pubspec.yaml -exec dirname {} \;)
-          cd "$PROJECT_PATH"
           flutter build ios --release --no-codesign
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios-app-bundle
-          # This path tells GitHub to look for the result folder wherever it ended up
-          path: "**/build/ios/iphoneos/"
+          path: build/ios/iphoneos/
