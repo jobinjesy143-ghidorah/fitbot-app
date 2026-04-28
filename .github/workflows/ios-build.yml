@@ -15,23 +15,27 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: List Files (Debug)
-        run: ls -R # This helps us see exactly where the files are if it fails
-
-      - name: Install Dependencies
-        # IMPORTANT: If your files are in a folder called 'fitbot', change '.' to 'fitbot'
+      - name: Smart Project Discovery & Install
         run: |
+          # This command finds exactly where your pubspec.yaml is located
+          PROJECT_PATH=$(find . -name pubspec.yaml -exec dirname {} \;)
+          echo "Project located at: $PROJECT_PATH"
+          
+          # Move into that folder and install everything
+          cd "$PROJECT_PATH"
           flutter pub get
           flutter precache --ios 
-        working-directory: . 
 
       - name: Build iOS (No Signature)
         run: |
+          # Find the project again to be safe
+          PROJECT_PATH=$(find . -name pubspec.yaml -exec dirname {} \;)
+          cd "$PROJECT_PATH"
           flutter build ios --release --no-codesign
-        working-directory: .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios-app-bundle
-          path: build/ios/iphoneos/
+          # This path tells GitHub to look for the result folder wherever it ended up
+          path: "**/build/ios/iphoneos/"
